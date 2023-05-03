@@ -93,7 +93,14 @@ export default function WindowManagerContextProvider({children}){
                 // return parentWindowsTree;
                 return ogWindowsTree;
             }
-        }
+        },
+        getNodeByAddress: ( address, parentWindowsTree={...windowsTree}) => {
+            if ( address.length > 0 ) {
+                return helpers.getNodeByAddress( address, parentWindowsTree[ address.shift() ]);
+            } else {
+                return parentWindowsTree;
+            }
+        },
     }
 
     /**
@@ -168,29 +175,58 @@ export default function WindowManagerContextProvider({children}){
         // get the address of the window being closed by its id from windowsRef
         const { address } = windowsRef.current[id];
         // find the node of this window from windowsTree
-        helpers.updateWindowsTree( address, (childrenWindowIds)=>{
-            if ( Object.keys(childrenWindowIds).length > 0) {
-                const confirmation = confirm('there are windows still opened, are you sure?');
-                if ( confirmation ) {
-                    // delete the node from windowsTree
-                    deleteNodeFromWindowsTree(id)
-                    // delete the key from windowsRef.current
-                    deleteKeyFromWindowsRef(id);
-                } 
-            } else {
-                deleteNodeFromWindowsTree(id);
+        //!v3
+        const childrenNodes = helpers.getNodeByAddress(address);
+        if ( Object.keys(childrenNodes).length > 0) {
+            const confirmation = confirm('there are windows still opened, are you sure?');
+            if ( confirmation ) {
+                deleteNodeFromWindowsTree(id, address);
                 deleteKeyFromWindowsRef(id);
-            }
-        })
+            } 
+        } else {
+            deleteNodeFromWindowsTree(id, address);
+            deleteKeyFromWindowsRef(id);
+        }
 
-        function deleteNodeFromWindowsTree(id){
+        function deleteNodeFromWindowsTree(id, address){
+
+            address.pop();
+            // console.log(address)
             helpers.updateWindowsTree( address, (childrenWindowIds)=>{
+                // console.log(childrenWindowIds)
                 delete childrenWindowIds[id];
             });
         }
-        function deleteKeyFromWindowsRef(id){
-            delete windowsRef.current[id];
-        }
+        function deleteKeyFromWindowsRef(id){ delete windowsRef.current[id]; }
+        //! v2
+        // helpers.updateWindowsTree( address, (childrenWindowIds)=>{
+        //     if ( Object.keys(childrenWindowIds).length > 0) {
+        //         const confirmation = confirm('there are windows still opened, are you sure?');
+        //         if ( confirmation ) {
+        //             // delete the node from windowsTree
+        //             deleteNodeFromWindowsTree(id, address)
+        //             // delete the key from windowsRef.current
+        //             // deleteKeyFromWindowsRef(id);
+        //         } 
+        //     } else {
+        //         deleteNodeFromWindowsTree(id, address);
+        //         // deleteKeyFromWindowsRef(id);
+        //     }
+        // })
+
+        // function deleteNodeFromWindowsTree(id, address){
+        //     // ! bug.. crashes after setting windowsTree
+        //     address.pop();
+        //     // console.log(address)
+        //     helpers.updateWindowsTree( address, (childrenWindowIds)=>{
+        //         // console.log(childrenWindowIds)
+        //         delete childrenWindowIds[id];
+        //     });
+        // }
+        // function deleteKeyFromWindowsRef(id){
+        //     delete windowsRef.current[id];
+        // }
+        // ! v1
         // const newWindowsTree = { ...windowsTree };
         // 
         // const { ...childrenWindows } = newWindowsTree[id];
