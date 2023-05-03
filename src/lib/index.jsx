@@ -133,7 +133,7 @@ export default function WindowManagerContextProvider({children}){
             props,
             Component
         } = windowsRef.current[id];
-        console.log(id, zIndex)
+        // console.log(id, zIndex)
         return(
             <Component
                 key={id}
