@@ -276,7 +276,7 @@ export default function WindowManagerContextProvider({children}){
         // TODO: change all windowId to windowIdRef within the package 
         windowIdRef: windowId,
         windowsTree,
-        // getWindowsByParentId: (id)=> helpers.getNodeByAddress( windowsRef.current[id].address ),
+        getWindowsByParentId: (id)=> helpers.getNodeByAddress( windowsRef.current[id].address ),
         helpers,
         windowsRef,
         createWindow,
