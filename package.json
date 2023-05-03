@@ -1,6 +1,6 @@
 {
     "name": "react-window-manager",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "description": "",
     "license": "ISC",
     "author": "",
@@ -35,20 +35,6 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
-    },
-    "eslintConfig": {
-        "env": {
-            "browser": true,
-            "node": true,
-            "es2020": true
-        },
-        "extends": [
-            "eslint:recommended",
-            "plugin:react/recommended"
-        ],
-        "parserOptions": {
-            "sourceType": "module"
-        }
     },
     "devDependencies": {
         "@testing-library/dom": "^9.2.0",

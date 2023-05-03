@@ -50,7 +50,10 @@ export default function WindowManagerContextProvider({children}){
      */
     const windowsRef = useRef({
         0:{
-            address: [0]
+            address: [0],
+            zIndex: undefined,
+            props: undefined,
+            Component: undefined
         }
     }); 
     /**
@@ -89,8 +92,11 @@ export default function WindowManagerContextProvider({children}){
             return topZIndexRef.current;
         },
         updateWindowsTree: ( address, updater, parentWindowsTree={...windowsTree}, ogWindowsTree=parentWindowsTree ) => {
+            const nextAddress = address.slice(1);
+            const nextParentWindowsTree = parentWindowsTree[ address[0] ];
+//! there may be problems here 
             if ( address.length > 0 ) {
-                return helpers.updateWindowsTree( address, updater, parentWindowsTree[ address.shift() ], ogWindowsTree );
+                return helpers.updateWindowsTree( nextAddress, updater,  nextParentWindowsTree, ogWindowsTree );
             } else {
                 // updater takes the node at address as argument. 
                 updater( parentWindowsTree );
@@ -101,9 +107,14 @@ export default function WindowManagerContextProvider({children}){
             }
         },
         getNodeByAddress: ( address, parentWindowsTree={...windowsTree}) => {
+            
+            const nextAddress = address.slice(1);
+            const nextParentWindowsTree =  parentWindowsTree[ address[0] ];
+            // console.log(address[ address.length - 1 ])
             if ( address.length > 0 ) {
-                return helpers.getNodeByAddress( address, parentWindowsTree[ address.shift() ]);
+                return helpers.getNodeByAddress( nextAddress, nextParentWindowsTree );
             } else {
+                // returns the window tree @ address
                 return parentWindowsTree;
             }
         },
@@ -121,6 +132,7 @@ export default function WindowManagerContextProvider({children}){
         // get the id for the newly created window
         const id = helpers.assignWindowId();
         const parentWindowAddress = windowsRef.current[parentWindowId].address;
+        // console.log(parentWindowId, parentWindowAddress)
         // 1) update windows
         windowsRef.current[id] = {
             address: [ ...parentWindowAddress, id],
@@ -129,6 +141,7 @@ export default function WindowManagerContextProvider({children}){
             props: { ...props },
             Component: Component
         };
+        
         // 2) update windowsTree
         helpers.updateWindowsTree( parentWindowAddress, ( parentWindowsTree ) => { parentWindowsTree[id]={} });
     };
@@ -139,7 +152,7 @@ export default function WindowManagerContextProvider({children}){
      * @param {*} windowId 
      */
     function renderWindow( id ){
-        // console.log(windowsRef.current)
+
         const {
             // address,
             zIndex,
@@ -183,6 +196,7 @@ export default function WindowManagerContextProvider({children}){
         // find the node of this window from windowsTree
         //!v3
         const childrenNodes = helpers.getNodeByAddress(address);
+        // console.log(childrenNodes)
         if ( Object.keys(childrenNodes).length > 0) {
             const confirmation = confirm('there are windows still opened, are you sure?');
             if ( confirmation ) {
@@ -195,10 +209,8 @@ export default function WindowManagerContextProvider({children}){
         }
 
         function deleteNodeFromWindowsTree(id, address){
-
-            address.pop();
             // console.log(address)
-            helpers.updateWindowsTree( address, (childrenWindowIds)=>{
+            helpers.updateWindowsTree( address.slice(0, -1), (childrenWindowIds)=>{
                 // console.log(childrenWindowIds)
                 delete childrenWindowIds[id];
             });

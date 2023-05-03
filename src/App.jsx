@@ -15,9 +15,9 @@ function App() {
 
   const { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow } = useMinimise([]);
 
-  const windowIds = Object.keys( windowsTree );
+  const windowIds = Object.keys( windowsTree[0] );
   const filteredWindowIds = windowIds.filter( windowId => !minimisedWindowIds.includes(windowId) );
-
+console.log('tree @ frontend',windowsTree)
   return (
 
       <div
@@ -30,7 +30,9 @@ function App() {
         <button 
           onClick={() => {
             createWindow(Window, {
-              onClick: (id) => {  closeWindow(id); }//(id) => {  minimiseWindow(id); },
+              onClick: (id) => {  
+                closeWindow(id); 
+              }//(id) => {  minimiseWindow(id); },
             }, 0);
           }}>
             new window
@@ -39,15 +41,19 @@ function App() {
   )
 }
 
-export default App
+export default App;
 
 
 function Window({...props}){
   const {
     id,
+    initialZIndex,
     onClick
   }=props;
   return ( <div>
-    <button onClick={()=>{onClick(id)}}>close</button>
+    <button onClick={()=>{
+      // console.log('clicked window show id', id)
+      onClick(id)
+      }}>close</button>
   </div>)
 }
