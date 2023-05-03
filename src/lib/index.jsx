@@ -120,7 +120,7 @@ export default function WindowManagerContextProvider({children}){
         //parentWindowId of 0 means it is at the root level;
         // get the id for the newly created window
         const id = helpers.assignWindowId();
-        const parentWindowAddress = parentWindowId? windowsRef.current[parentWindowId].address : [];
+        const parentWindowAddress = windowsRef.current[parentWindowId].address;
         // 1) update windows
         windowsRef.current[id] = {
             address: [ ...parentWindowAddress, id],
