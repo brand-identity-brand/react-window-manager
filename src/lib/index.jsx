@@ -48,7 +48,11 @@ export default function WindowManagerContextProvider({children}){
      *      }
      *  }
      */
-    const windowsRef = useRef({}); 
+    const windowsRef = useRef({
+        0:{
+            address: [0]
+        }
+    }); 
     /**
      * keeps the window rendering tree. 
      * 
@@ -66,7 +70,9 @@ export default function WindowManagerContextProvider({children}){
      *      }
      *  }
      */
-    const [ windowsTree, setWindowsTree ] = useState({}); //
+    const [ windowsTree, setWindowsTree ] = useState({
+        0:{}
+    }); //
     /**
      * keeps the current topZIndex. 
      * +1 before each assignment
@@ -114,17 +120,17 @@ export default function WindowManagerContextProvider({children}){
         //parentWindowId of 0 means it is at the root level;
         // get the id for the newly created window
         const id = helpers.assignWindowId();
-        const address = parentWindowId? windowsRef.current[parentWindowId].address : [];
+        const parentWindowAddress = parentWindowId? windowsRef.current[parentWindowId].address : [];
         // 1) update windows
         windowsRef.current[id] = {
-            address: [ ...address, id],
+            address: [ ...parentWindowAddress, id],
             zIndex: helpers.assignTopZIndex(),
             // user input
             props: { ...props },
             Component: Component
         };
         // 2) update windowsTree
-        helpers.updateWindowsTree( address, ( parentWindowsTree ) => { parentWindowsTree[id]={} });
+        helpers.updateWindowsTree( parentWindowAddress, ( parentWindowsTree ) => { parentWindowsTree[id]={} });
     };
 
     /**
