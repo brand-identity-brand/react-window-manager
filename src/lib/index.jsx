@@ -278,7 +278,7 @@ export default function WindowManagerContextProvider({children}){
         windowsTree,
         getWindowsByParentId: (id)=> helpers.getNodeByAddress( windowsRef.current[id].address ),
         getMinimisedWindowsInDesktop: (parentWindowId, minimisedWindowIds) => {
-            const currentDesktopChildrenWindowsId = Object.keys( getWindowsByParentId(parentWindowId) );
+            const currentDesktopChildrenWindowsId = Object.keys( value.getWindowsByParentId(parentWindowId) );
             return minimisedWindowIds.filter( id => currentDesktopChildrenWindowsId.includes(id) )
         },    
         helpers,
