@@ -38,16 +38,19 @@ export default function WindowManagerContextProvider({children}){
      *          address: [ 12, 26, 70, 80 ],
      *          zIndex: 9,
      *          props: { ...props },
-     *          Component: Component
+     *          Component: Component,
+     *          useMinimise: { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow }
      *      },
      *      3: {
      *          address: [ 12, 26, 70, 80, 3 ],
      *          zIndex: 9,
      *          props: { ...props },
-                Component: Component
+     *          Component: Component,
+     *          useMinimise: { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow }
      *      }
      *  }
      */
+
     const windowsRef = useRef({
         0:{
             address: [0],
@@ -118,6 +121,11 @@ export default function WindowManagerContextProvider({children}){
                 return parentWindowsTree;
             }
         },
+        getWindowsByParentId: (id)=> helpers.getNodeByAddress( windowsRef.current[id].address ),
+        getMinimisedWindowsInDesktop: (parentWindowId, minimisedWindowIds) => {
+            const currentDesktopChildrenWindowsId = Object.keys( helpers.getWindowsByParentId(parentWindowId) );
+            return minimisedWindowIds.filter( id => currentDesktopChildrenWindowsId.includes(id) )
+        },  
     }
 
     /**
@@ -139,7 +147,7 @@ export default function WindowManagerContextProvider({children}){
             zIndex: helpers.assignTopZIndex(),
             // user input
             props: { ...props },
-            Component: Component
+            Component: Component,
         };
         
         // 2) update windowsTree
@@ -216,71 +224,27 @@ export default function WindowManagerContextProvider({children}){
             });
         }
         function deleteKeyFromWindowsRef(id){ delete windowsRef.current[id]; }
-        //! v2
-        // helpers.updateWindowsTree( address, (childrenWindowIds)=>{
-        //     if ( Object.keys(childrenWindowIds).length > 0) {
-        //         const confirmation = confirm('there are windows still opened, are you sure?');
-        //         if ( confirmation ) {
-        //             // delete the node from windowsTree
-        //             deleteNodeFromWindowsTree(id, address)
-        //             // delete the key from windowsRef.current
-        //             // deleteKeyFromWindowsRef(id);
-        //         } 
-        //     } else {
-        //         deleteNodeFromWindowsTree(id, address);
-        //         // deleteKeyFromWindowsRef(id);
-        //     }
-        // })
 
-        // function deleteNodeFromWindowsTree(id, address){
-        //     // ! bug.. crashes after setting windowsTree
-        //     address.pop();
-        //     // console.log(address)
-        //     helpers.updateWindowsTree( address, (childrenWindowIds)=>{
-        //         // console.log(childrenWindowIds)
-        //         delete childrenWindowIds[id];
-        //     });
-        // }
-        // function deleteKeyFromWindowsRef(id){
-        //     delete windowsRef.current[id];
-        // }
-        // ! v1
-        // const newWindowsTree = { ...windowsTree };
-        // 
-        // const { ...childrenWindows } = newWindowsTree[id];
-        // if ( Object.keys(childrenWindows).length > 0) {
-        //     const confirmation = confirm('there are windows still opened, are you sure?');
-        //     if ( confirmation ) {
-        //         delete newWindowsTree[id];
-        //         setWindowsTree( newWindowsTree );
-        //     } 
-        // } else {
-        //     delete newWindowsTree[id];
-        //     setWindowsTree( newWindowsTree );
-        // }
     }
 
-    // const [ minimisedWindowIds, setMinimisedWindowIds ] = useState([]);
 
-    // function minimiseWindow(id) {
-    //     setMinimisedWindowIds( [ ...minimisedWindowIds, id ] );
-    // }
-
-    // function restoreMinimisedWindow(id) {
-    //     const indexToRemove = minimisedWindowIds.findIndex( min_id => min_id === id );
-    //     minimisedWindowIds.splice(indexToRemove, 1);
-    //     setMinimisedWindowIds( [ ...minimisedWindowIds ] );
-    // }
+    const [ minimisedWindowIds, setMinimisedWindowIds ] = useState( defaultValue=[] );
+    const useMinimise = {
+        minimisedWindowIds, 
+        minimiseWindow: (id) => { // setMinimisedWindowId, 
+            setMinimisedWindowIds( prevState => [...prevState, id]);
+        },
+        restoreMinimisedWindow: (id) => { // unsetMinimisedWindowId
+            setMinimisedWindowIds( prevState => prevState.filter( minimisedWindowId => minimisedWindowId !== id ) );
+        }
+    }
 
     const value = {
         // TODO: change all windowId to windowIdRef within the package 
         windowIdRef: windowId,
         windowsTree,
-        getWindowsByParentId: (id)=> helpers.getNodeByAddress( windowsRef.current[id].address ),
-        getMinimisedWindowsInDesktop: (parentWindowId, minimisedWindowIds) => {
-            const currentDesktopChildrenWindowsId = Object.keys( value.getWindowsByParentId(parentWindowId) );
-            return minimisedWindowIds.filter( id => currentDesktopChildrenWindowsId.includes(id) )
-        },    
+        getWindowsByParentId: helpers.getWindowsByParentId,
+        getMinimisedWindowsInDesktop: helpers.getMinimisedWindowsInDesktop,
         helpers,
         windowsRef,
         createWindow,
@@ -311,22 +275,22 @@ export default function WindowManagerContextProvider({children}){
  * @param {*} defaultValue 
  * @returns 
  */
-function useMinimise( defaultValue=[] ){
-    const [ minimisedWindowIds, setMinimisedWindowIds ] = useState( defaultValue );
+// function useMinimise( defaultValue=[] ){
+//     const [ minimisedWindowIds, setMinimisedWindowIds ] = useState( defaultValue );
 
-    function minimiseWindow(id) {
-        setMinimisedWindowIds( prevState => [...prevState, id]);
-    }
+//     function minimiseWindow(id) {
+//         setMinimisedWindowIds( prevState => [...prevState, id]);
+//     }
 
-    function restoreMinimisedWindow(id) {
-        setMinimisedWindowIds( prevState => prevState.filter( minimisedWindowId => minimisedWindowId !== id ) );
-    }
-    return {
-        minimisedWindowIds, 
-        minimiseWindow, // setMinimisedWindowId, 
-        restoreMinimisedWindow // unsetMinimisedWindowId
-    }
-};
+//     function restoreMinimisedWindow(id) {
+//         setMinimisedWindowIds( prevState => prevState.filter( minimisedWindowId => minimisedWindowId !== id ) );
+//     }
+//     return {
+//         minimisedWindowIds, 
+//         minimiseWindow, // setMinimisedWindowId, 
+//         restoreMinimisedWindow // unsetMinimisedWindowId
+//     }
+// };
 
 // function useMaximise( defaultValue=[] ){
 //     const [ maximisedWindowIds, setMaximisedWindowIds ] = useState( defaultValue );

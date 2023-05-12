@@ -36,7 +36,7 @@ function App() {
                 closeWindow(id); 
               },//(id) => {  minimiseWindow(id); },
               minimise_onClick: minimiseWindow
-            }, 0);
+            }, 0, { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow });
           }}>
             new window
         </button>
@@ -55,8 +55,10 @@ function Window({...props}){
     id,
     initialZIndex,
     onClick,
-    minimise_onClick
+    minimise_onClick,
+    useMinimise
   }=props;
+  console.log(useMinimise)
   return ( 
     <div style={{
       padding: '20px',
