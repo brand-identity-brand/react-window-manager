@@ -228,7 +228,7 @@ export default function WindowManagerContextProvider({children}){
     }
 
 
-    const [ minimisedWindowIds, setMinimisedWindowIds ] = useState( defaultValue=[] );
+    const [ minimisedWindowIds, setMinimisedWindowIds ] = useState([]);
     const useMinimise = {
         minimisedWindowIds, 
         minimiseWindow: (id) => { // setMinimisedWindowId, 
