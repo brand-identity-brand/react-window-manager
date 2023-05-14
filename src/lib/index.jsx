@@ -229,15 +229,30 @@ export default function WindowManagerContextProvider({children}){
 
 
     const [ minimisedWindowIds, setMinimisedWindowIds ] = useState([]);
-    const useMinimise = {
-        minimisedWindowIds, 
-        minimiseWindow: (id) => { // setMinimisedWindowId, 
-            setMinimisedWindowIds( prevState => [...prevState, id]);
-        },
-        restoreMinimisedWindow: (id) => { // unsetMinimisedWindowId
-            setMinimisedWindowIds( prevState => prevState.filter( minimisedWindowId => minimisedWindowId !== id ) );
+    function useMinimise(initialState=[]){
+        // TODO: mimick useState
+        // if ( Array.isArray(initialState) ){
+        //     setMinimisedWindowIds(initialState)
+        // }
+        return {
+            minimisedWindowIds, 
+            minimiseWindow: (id) => { // setMinimisedWindowId, 
+                setMinimisedWindowIds( prevState => [...prevState, id]);
+            },
+            restoreMinimisedWindow: (id) => { // unsetMinimisedWindowId
+                setMinimisedWindowIds( prevState => prevState.filter( minimisedWindowId => minimisedWindowId !== id ) );
+            }
         }
     }
+    // const useMinimise = {
+    //     minimisedWindowIds, 
+    //     minimiseWindow: (id) => { // setMinimisedWindowId, 
+    //         setMinimisedWindowIds( prevState => [...prevState, id]);
+    //     },
+    //     restoreMinimisedWindow: (id) => { // unsetMinimisedWindowId
+    //         setMinimisedWindowIds( prevState => prevState.filter( minimisedWindowId => minimisedWindowId !== id ) );
+    //     }
+    // }
 
     const value = {
         // TODO: change all windowId to windowIdRef within the package 

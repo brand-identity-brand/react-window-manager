@@ -14,7 +14,7 @@ function App() {
     getMinimisedWindowsInDesktop
   } = useContext(WindowManagerContext);
 
-  const { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow } = useMinimise([]);
+  const { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow } = useMinimise();
 
   const windowIds = Object.keys( windowsTree[0] );
   const filteredWindowIds = windowIds.filter( windowId => !minimisedWindowIds.includes(windowId) );
