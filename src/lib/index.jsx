@@ -152,6 +152,9 @@ export default function WindowManagerContextProvider({children}){
         
         // 2) update windowsTree
         helpers.updateWindowsTree( parentWindowAddress, ( parentWindowsTree ) => { parentWindowsTree[id]={} });
+
+        //return
+        return id;
     };
 
     /**
