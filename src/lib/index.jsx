@@ -39,14 +39,14 @@ export default function WindowManagerContextProvider({children}){
      *          zIndex: 9,
      *          props: { ...props },
      *          Component: Component,
-     *          useMinimise: { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow }
+     *          //useMinimise: { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow }
      *      },
      *      3: {
      *          address: [ 12, 26, 70, 80, 3 ],
      *          zIndex: 9,
      *          props: { ...props },
      *          Component: Component,
-     *          useMinimise: { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow }
+     *          //useMinimise: { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow }
      *      }
      *  }
      */
@@ -212,21 +212,26 @@ export default function WindowManagerContextProvider({children}){
             const confirmation = confirm('there are windows still opened, are you sure?');
             if ( confirmation ) {
                 deleteNodeFromWindowsTree(id, address);
-                deleteKeyFromWindowsRef(id);
+                // deleteKeyFromWindowsRef(id);
             } 
         } else {
             deleteNodeFromWindowsTree(id, address);
-            deleteKeyFromWindowsRef(id);
+            // deleteKeyFromWindowsRef(id);
         }
 
         function deleteNodeFromWindowsTree(id, address){
             // console.log(address)
             helpers.updateWindowsTree( address.slice(0, -1), (childrenWindowIds)=>{
-                // console.log(childrenWindowIds)
-                delete childrenWindowIds[id];
+                // run deelte states
+                // ! windowsRef.current[id].closeWindow();
+                // ! this should be in rde not here
+                // 
+                delete childrenWindowIds[id]; //remove from windowsTree
+                //
+                delete windowsRef.current[id];
             });
         }
-        function deleteKeyFromWindowsRef(id){ delete windowsRef.current[id]; }
+        // function deleteKeyFromWindowsRef(id){ delete windowsRef.current[id]; }
 
     }
 
