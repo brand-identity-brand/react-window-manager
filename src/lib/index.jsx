@@ -212,11 +212,11 @@ export default function WindowManagerContextProvider({children}){
             const confirmation = confirm('there are windows still opened, are you sure?');
             if ( confirmation ) {
                 deleteNodeFromWindowsTree(id, address);
-                // deleteKeyFromWindowsRef(id);
+                deleteKeysFromWindowsRef(id, childrenNodes);
             } 
         } else {
             deleteNodeFromWindowsTree(id, address);
-            // deleteKeyFromWindowsRef(id);
+            deleteKeysFromWindowsRef(id, childrenNodes);
         }
 
         function deleteNodeFromWindowsTree(id, address){
@@ -228,11 +228,52 @@ export default function WindowManagerContextProvider({children}){
                 // 
                 delete childrenWindowIds[id]; //remove from windowsTree
                 //
-                delete windowsRef.current[id];
+                // delete windowsRef.current[id];
             });
         }
-        // function deleteKeyFromWindowsRef(id){ delete windowsRef.current[id]; }
+        function deleteKeysFromWindowsRef(id, childrenNodes){ 
+            // done - ! priority
+            // done - TODO: flatten childrenNodes, remove all from windowsRef
+            // {
+            //     id: {
+            //         id: {
 
+            //         },
+            //         id: {
+            //             id:{ 
+
+            //             },
+            //             id: {
+
+            //             }
+            //         }
+            //     }.
+            //     id: {
+            //         id: {
+
+            //         }
+            //     }
+            // }
+            function idExtractor(obj, result=[]){ //obj = childrenNodes
+                const keys = Object.keys(obj);
+                const values = Object.values(obj);
+                const nextValues = values.reduce( (accum, curr)=>{
+                  return Object.keys(curr).length > 0
+                      ? {...accum, ...curr}
+                        : accum
+                },{});
+                const newResult = [...result, ...keys];
+                if ( Object.keys(nextValues).length > 0 ) {
+                    console.log('next',newResult)
+                    return a(nextValues, newResult)
+                }
+                console.log('end',newResult)
+                return newResult;
+            }
+            const idsToBeDeleted = idExtractor(childrenNodes);
+            idsToBeDeleted.forEach( id => delete windowsRef.current[id]);
+            delete windowsRef.current[id]; 
+        }
     }
 
 
