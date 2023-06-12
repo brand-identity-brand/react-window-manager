@@ -264,10 +264,10 @@ export default function WindowManagerContextProvider({children}){
                 },{});
                 const newResult = [...result, ...keys];
                 if ( Object.keys(nextValues).length > 0 ) {
-                    console.log('next',newResult)
-                    return a(nextValues, newResult)
+                    // console.log('next',newResult)
+                    return idExtractor(nextValues, newResult)
                 }
-                console.log('end',newResult)
+                // console.log('end',newResult)
                 return newResult;
             }
             const idsToBeDeleted = idExtractor(childrenNodes);
