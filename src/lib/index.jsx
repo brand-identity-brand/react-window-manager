@@ -94,6 +94,14 @@ export default function WindowManagerContextProvider({children}){
             topZIndexRef.current = topZIndexRef.current + 1;
             return topZIndexRef.current;
         },
+        /**
+         * updates windowsTree at address
+         * @param {*} address 
+         * @param {*} updater 
+         * @param {*} parentWindowsTree 
+         * @param {*} ogWindowsTree 
+         * @returns 
+         */
         updateWindowsTree: ( address, updater, parentWindowsTree={...windowsTree}, ogWindowsTree=parentWindowsTree ) => {
             const nextAddress = address.slice(1);
             const nextParentWindowsTree = parentWindowsTree[ address[0] ];
@@ -109,6 +117,12 @@ export default function WindowManagerContextProvider({children}){
                 return ogWindowsTree;
             }
         },
+        /**
+         * returns subTree at address
+         * @param {*} address 
+         * @param {*} parentWindowsTree 
+         * @returns 
+         */
         getNodeByAddress: ( address, parentWindowsTree={...windowsTree}) => {
             
             const nextAddress = address.slice(1);
