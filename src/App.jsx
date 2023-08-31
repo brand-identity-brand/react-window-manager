@@ -1,77 +1,39 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { WindowManagerContext } from './lib';
 
-// import './App.css'
+import { WindowManagerContext, WindowManagerProvider } from './lib';
 
 function App() {
-  const  {
-    windowsRef,
-    windowsTree,
-    createWindow,
-    renderWindow,
-    useMinimise,
-    closeWindow,
-    getMinimisedWindowsInDesktop
-  } = useContext(WindowManagerContext);
+     const { getNextIdCounter, initWindow, registerWindow, hideWindow, unhideWindow, closeWindow, setData,...windows} = useContext(WindowManagerContext);
 
-  const { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow } = useMinimise();
+    const [ idToAction, setIdToAction] = useState(0);
+    
+    return (
+        <div style={{ width: '100vw', height: '100vh'}}>
+            {/* { filteredWindowIds.map( renderWindow ) } */}
+            <button onClick={()=>{
+                const id = getNextIdCounter();
+                initWindow(id)
+                registerWindow(id) 
+            }}> initWindow </button> <br/>
 
-  const windowIds = Object.keys( windowsTree[0] );
-  const filteredWindowIds = windowIds.filter( windowId => !minimisedWindowIds.includes(windowId) );
-// console.log('tree @ frontend',windowsTree)
-
-  return (
-
-      <div
-        style={{
-          width: '100vw',
-          height: '100vh'
-        }}
-      >
-      { filteredWindowIds.map( renderWindow ) }
-        <button 
-          onClick={() => {
-            createWindow(Window, {
-              onClick: (id) => {  
-                closeWindow(id); 
-              },//(id) => {  minimiseWindow(id); },
-              minimise_onClick: minimiseWindow
-            }, 0, { minimisedWindowIds, minimiseWindow, restoreMinimisedWindow });
-          }}>
-            new window
-        </button>
-        <div>
-          {JSON.stringify(getMinimisedWindowsInDesktop(0, minimisedWindowIds))}
+            <input onChange={(e)=>{
+                setIdToAction(e.target.value)
+            }}></input><br/>
+            <button onClick={()=>{ hideWindow(idToAction) }}> hideWindow </button><br/>
+            <button onClick={()=>{ unhideWindow(idToAction) }}> unhideWindow </button><br/>
+            <button onClick={()=>{ closeWindow(idToAction) }}> closeWindow </button><br/>
+            
+            { `active: ${ JSON.stringify(windows.activeWindows) }`}<br/>
+            { `hidden: ${ JSON.stringify(windows.hiddenWindows) }`}<br/>
+            { `closed: ${ JSON.stringify(windows.closedWindows) }`}<br/>
         </div>
-      </div>
-  )
+    )
 }
 
-export default App;
-
-
-function Window({...props}){
-  const {
-    id,
-    initialZIndex,
-    onClick,
-    minimise_onClick,
-    useMinimise
-  }=props;
-  console.log(useMinimise)
-  return ( 
-    <div style={{
-      padding: '20px',
-      border: '1px solid black'
-    }}>
-      <button onClick={()=>{
-        // console.log('clicked window show id', id)
-        onClick(id)
-        }}>close</button>
-      <button onClick={()=>{
-    // console.log('clicked window show id', id)
-        minimise_onClick(id)
-        }}>minimise</button>
-    </div>
-  )
+export default function WrappedHome(){
+    return (
+        <WindowManagerProvider id={'app'}>
+            <App/>
+        </WindowManagerProvider>
+    )
 }

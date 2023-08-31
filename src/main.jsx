@@ -1,16 +1,13 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
-import WindowManagerContextProvider from './lib';
-ReactDOM.render(
-  <WindowManagerContextProvider>
+import WindowManagerRegistryProvider from './lib';
 
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-
-  </WindowManagerContextProvider>,
-  document.getElementById('root')
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <WindowManagerRegistryProvider>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </WindowManagerRegistryProvider>
 );
-
