@@ -1,199 +1,178 @@
 import { useRef, useContext, useEffect, useState, useMemo } from "react";
 
-import useLocalStorageState from './useLocalStorageState';
-
 import { WindowManagerRegistryContext } from "../context/WindowManagerRegistry";
 
 
-
-export default function useWindowManager(id){
+export default function useWindowManager(currentWindowId){
     const {
-        // isLocalStorageHydrated,
-        getNextIdCounter,
-        initWindow
+        getTargetWindowSpecsById,
+        setTargetWindowSpecsById,
+        initWindow,
+        reassginTargetWindowId  
     } = useContext(WindowManagerRegistryContext);
-    // console.log( id, localStorage.getItem(`${id}`)  )
-    const localStorageItemString = () => localStorage.hasOwnProperty(`${id}`)
-        ? localStorage.getItem(`${id}`) 
-        : (()=>{ 
-            localStorage.setItem(`${id}`, '{}'); return '{}'
-    })();
 
-    const localStorageItemObject = JSON.parse( localStorageItemString() );
-
-    const defaultWindowsAtom = localStorageItemObject?.hasOwnProperty('windows')
-        ? localStorageItemObject.windows 
-        : (()=>{
-            localStorageItemObject['windows'] = {
-                activeWindows: [],
-                hiddenWindows: [],
-                closedWindows: []
-            };
-            localStorage.setItem(`${id}`, JSON.stringify(localStorageItemObject))
-            return localStorageItemObject.windows
-        })()
-    ;
-    const defaultStatesAtom = localStorageItemObject?.hasOwnProperty('states')
-        ? localStorageItemObject.states
-        : (()=>{
-            localStorageItemObject['states'] = {};
-            localStorage.setItem(`${id}`, JSON.stringify(localStorageItemObject))
-            return localStorageItemObject.states;
-        })()
-    ;
-
-    // const windowsAtom = useMemo(() => atom(`${id}`,'windows', defaultWindowsAtom ),[]);
-    // const statesAtom = useMemo(() => atom(`${id}`,'states', defaultStatesAtom),[]);
-
-    // const [ windows, setWindows] = useAtom(windowsAtom); 
-    // const [ states, setStates] = useAtom(statesAtom); 
-    const [ windows, setWindows] = useLocalStorageState(id, 'windows', defaultWindowsAtom ); 
-    const [ states, setStates] = useLocalStorageState(id, 'states', defaultStatesAtom); 
-
-    const { activeWindows, hiddenWindows, closedWindows } = windows;
-
-    /**
-     * register child window to current parent window
-     * checker0: if id is duplicated abort initialisation.
-     * @param {*} id 
-     */
-    function registerWindow(id){
+    // below const are used once when hydrating from last session.
+    const { windows: windowsFromLastSession, states: statesFromLastSession } = useMemo( ()=>getTargetWindowSpecsById(currentWindowId), [] );
+    const [ windows, setWindows ] = useState(windowsFromLastSession);
+    const { active, hidden, closed } = windows;
+    const [ states, setStates ] = useState(statesFromLastSession); 
+    // utility functions
+    function registerWindow(childWindowId){
         //checker0
-        if ( activeWindows.includes(id) ) return;
-        //checker0 passed
+        if ( active.includes(childWindowId) ) return;
+        //checker0 passedsetTargetWindowSpecsById
         setWindows((prev)=> {
-            return {
-                activeWindows: [...prev.activeWindows, id],
-                hiddenWindows: prev.hiddenWindows,
-                closedWindows: prev.closedWindows
-            }
+            const next = {
+                active: [...prev.active, childWindowId],
+                hidden: prev.hidden,
+                closed: prev.closed
+            };
+            setTargetWindowSpecsById(currentWindowId, {windows: next});
+            return next;
         });
+        const { registeredIn: prevRegisteredIn } = getTargetWindowSpecsById(childWindowId);
+        setTargetWindowSpecsById(childWindowId, {registeredIn: [...prevRegisteredIn, currentWindowId]});
     }
     /* pass below functions from parent Context*/
-    function liftWindowToTop(id){
+    function liftWindowToTop(childWindowId){
         // do nothing if window is already at the top
-        const windowPosition = activeWindows.indexOf(id);
-        if ( windowPosition === activeWindows.length - 1 ) return;
+        const windowPosition = active.indexOf(childWindowId);
+        if ( windowPosition === active.length - 1 ) return;
         
-        // rearrang id to the last position.
+        // rearrang childWindowId to the last position.
         setWindows((prev)=> {
-            const nextWithoutId = prev.activeWindows.filter( item => {
-                if (item === id) return false;
+            const nextWithoutId = prev.active.filter( item => {
+                if (item === childWindowId) return false;
                 return true;
-            })
-            return {
-                activeWindows: [...nextWithoutId, id],
-                hiddenWindows: prev.hiddenWindows,
-                closedWindows: prev.closedWindows
-            }
+            });
+            const next = {
+                active: [...nextWithoutId, childWindowId],
+                hidden: prev.hidden,
+                closed: prev.closed
+            };
+            setTargetWindowSpecsById(currentWindowId, { windows: next });
+            return next;
         });
     }
     /**
      * checker0: if id is duplicated abort appending to hiddenWindowsRef.
-     * @param {*} id 
+     * @param {*} childWindowId 
      */
 
-    function hideWindow(id){
+    function hideWindow(childWindowId){
 
-        const next = activeWindows.filter( (value) => {
-            if ( value === id ) return false;
+        const nextActive = active.filter( (value) => {
+            if ( value === childWindowId ) return false;
             return true;
         });
         //checker0
-        if ( next.length === activeWindows.length ) return;
+        if ( nextActive.length === active.length ) return;
         //checker0 passed
         setWindows((prev)=> {
-            return {
-                activeWindows: next,
-                hiddenWindows: [...prev.hiddenWindows, id],
-                closedWindows: prev.closedWindows
+            const next = {
+                active: nextActive,
+                hidden: [...prev.hidden, childWindowId],
+                closed: prev.closed
             }
+            setTargetWindowSpecsById(currentWindowId, {windows: next});
+            return next;
         });
     }
 
-    function unhideWindow(id){
-        const next = hiddenWindows.filter( (value) => {
-            if ( value === id ) return false;
+    function unhideWindow(childWindowId){
+        const nextHidden = hidden.filter( (value) => {
+            if ( value === childWindowId ) return false;
             return true;
         });
         //checker0
-        if ( next.length === hiddenWindows.length ) return;
+        if ( nextHidden.length === hidden.length ) return;
         //checker0 passed
-        setWindows((windows)=> {
-            return {
-                activeWindows: [...windows.activeWindows, id],
-                hiddenWindows: next,
-                closedWindows: windows.closedWindows
+        setWindows((prev)=> {
+            const next = {
+                active: [...prev.active, childWindowId],
+                hidden: nextHidden,
+                closed: prev.closed
             }
+            setTargetWindowSpecsById(currentWindowId, { window: next } );
+            return next;
         });
     }
 
-    function closeWindow(id, status){
+    function closeWindow(childWindowId, status){
+        const timestamp = Date.now();
+        const nextChildWindowId = `${childWindowId}@${timestamp}`;
         switch (status) {
             case 'active': {
                 //checker0
-                const fromActive = activeWindows.includes(id);
+                const fromActive = active.includes(childWindowId);
                 if ( fromActive === false ) break;
                 //checker0 passed
-                const next = activeWindows.filter( (value) => {
-                    if ( value === id ) return false;
+                const nextActive = active.filter( (value) => {
+                    if ( value === childWindowId ) return false;
                     return true;
                 });
-                setWindows((windows)=> {
-                    return {
-                        activeWindows: next,
-                        hiddenWindows: windows.hiddenWindows,
-                        closedWindows: [...windows.closedWindows, id]
-                    }
+                setWindows((prev)=> {
+                    const next = {
+                        active: nextActive,
+                        hidden: prev.hidden,
+                        closed: [...prev.closed, nextChildWindowId]
+                    };
+                    setTargetWindowSpecsById(currentWindowId, { window: next})
+                    return next;
                 });
                 break;
             }
             case 'hidden': {
                 //checker0
-                const fromHidden = hiddenWindows.includes(id);
+                const fromHidden = hidden.includes(childWindowId);
                 if (fromHidden === false ) break;
                 //checker0 passed
-                const next = hiddenWindows.filter( (value) => {
-                    if ( value === id ) return false;
+                const nextHidden = hidden.filter( (value) => {
+                    if ( value === childWindowId ) return false;
                     return true;
                 });
-                setWindows((windows)=> {
-                    return {
-                        activeWindows: windows.activeWindows,
-                        hiddenWindows: next,
-                        closedWindows: [...windows.closedWindows, id]
+                setWindows((prev)=> {
+                    const next = {
+                        active: prev.active,
+                        hidden: nextHidden,
+                        closed: [...prev.closed, nextChildWindowId]
                     }
+                    setTargetWindowSpecsById(currentWindowId, { window: next})
+                    return next;
                 });
                 break;
             }
             default: {
                 //checker0
-                const fromActive = activeWindows.includes(id);
-                const fromHidden = hiddenWindows.includes(id);
+                const fromActive = active.includes(childWindowId);
+                const fromHidden = hidden.includes(childWindowId);
                 if ( fromActive === false && fromHidden === false ) break;
                 //checker0 passed
-                const next = { activeWindows, hiddenWindows };
+                const nextActiveHidden = { active, hidden };
                 if ( fromActive === true ) {
-                    next.activeWindows = activeWindows.filter( (value) => {
-                        if ( value === id ) return false;
+                    nextActiveHidden.active = active.filter( (value) => {
+                        if ( value === childWindowId ) return false;
                         return true;
                     });
                 }
                 if ( fromHidden === true ) {
-                    next.hiddenWindows = hiddenWindows.filter( (value) => {
-                        if ( value === id ) return false;
+                    nextActiveHidden.hidden = hidden.filter( (value) => {
+                        if ( value === childWindowId ) return false;
                         return true;
                     });
                 }
-                setWindows((windows)=> {
-                    return {
-                        activeWindows: next.activeWindows,
-                        hiddenWindows: next.hiddenWindows,
-                        closedWindows: [...windows.closedWindows, id]
+                setWindows((prev)=> {
+                    const next = {
+                        active: nextActiveHidden.active,
+                        hidden: nextActiveHidden.hidden,
+                        closed: [...prev.closed, nextChildWindowId]
                     }
+                    setTargetWindowSpecsById(currentWindowId, { window: next})
+                    return next;
                 });
             }
         }
+        reassginTargetWindowId(childWindowId, nextChildWindowId)
     }
     function isWindowStatesReady(stateTitlesArray=[]){
 
@@ -216,12 +195,10 @@ export default function useWindowManager(id){
     }
 
     return {
-        id,
-        activeWindows: activeWindows,
-        hiddenWindows: hiddenWindows,
-        closedWindows: closedWindows,
+        currentWindowId,
+        windows,
         //
-        getNextIdCounter: getNextIdCounter, //function
+        // getNextIdCounter: getNextIdCounter, //function
         initWindow: initWindow,//function,
         registerWindow: registerWindow,
         //

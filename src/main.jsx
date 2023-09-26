@@ -1,13 +1,27 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
-import WindowManagerRegistryProvider from './lib';
+import WindowManagerRegistryProvider, {WindowManagerRegistryContext} from './lib';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <WindowManagerRegistryProvider>
+ReactDOM.createRoot(document.getElementById('root')).render(<Wrapper/>);
+
+function Wrapper(){
+  return (
     <React.StrictMode>
-      <App />
+      <WindowManagerRegistryProvider>
+        <Main/>
+      </WindowManagerRegistryProvider>
     </React.StrictMode>
-  </WindowManagerRegistryProvider>
-);
+  )
+}
+
+function Main(){
+  const { initWindow } = useContext(WindowManagerRegistryContext);
+  initWindow('app');
+  return (
+    // <WindowManagerProvider id={'app'}>
+      <App/>
+    // </WindowManagerProvider>
+  )
+}
