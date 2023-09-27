@@ -98,7 +98,7 @@ export default function useWindowManager(currentWindowId){
                 hidden: nextHidden,
                 closed: prev.closed
             }
-            setTargetWindowSpecsById(currentWindowId, { window: next } );
+            setTargetWindowSpecsById(currentWindowId, { windows: next } );
             return next;
         });
     }
@@ -190,10 +190,10 @@ export default function useWindowManager(currentWindowId){
     }
     function setWindowState(title, value){
         setStates((prev)=>{
-            console.log(1+` ${currentWindowId}`,prev)
+
             prev[title] = value;
             setTargetWindowSpecsById(currentWindowId, { states: prev })
-            console.log(2+` ${currentWindowId}`,prev)
+
             return prev;
         });
     }
@@ -201,13 +201,13 @@ export default function useWindowManager(currentWindowId){
         return states[title]
     }
 
-    function useWmState(title, value){
-        if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
-            return [ states[title], (value)=>setWindowState(title, value) ]
-        }
-        setWindowState(title, value);
-        return [ states[title], (value)=>setWindowState(title, value) ]
-    };
+    // function useWmState(title, value){
+    //     if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
+    //         return [ states[title], (value)=>setWindowState(title, value) ]
+    //     }
+    //     setWindowState(title, value);
+    //     return [ states[title], (value)=>setWindowState(title, value) ]
+    // };
 
     return {
         currentWindowId,
@@ -221,8 +221,8 @@ export default function useWindowManager(currentWindowId){
         closeWindow: closeWindow,
         //
         isWindowStatesReady,
-        // setWindowState,
-        // getWindowState,
-        useWmState
+        setWindowState,
+        getWindowState,
+        // useWmState
     }
 }
