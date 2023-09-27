@@ -122,7 +122,7 @@ export default function useWindowManager(currentWindowId){
                         hidden: prev.hidden,
                         closed: [...prev.closed, nextChildWindowId]
                     };
-                    setTargetWindowSpecsById(currentWindowId, { window: next})
+                    setTargetWindowSpecsById(currentWindowId, { windows: next})
                     return next;
                 });
                 break;
@@ -142,7 +142,7 @@ export default function useWindowManager(currentWindowId){
                         hidden: nextHidden,
                         closed: [...prev.closed, nextChildWindowId]
                     }
-                    setTargetWindowSpecsById(currentWindowId, { window: next})
+                    setTargetWindowSpecsById(currentWindowId, { windows: next})
                     return next;
                 });
                 break;
@@ -172,7 +172,7 @@ export default function useWindowManager(currentWindowId){
                         hidden: nextActiveHidden.hidden,
                         closed: [...prev.closed, nextChildWindowId]
                     }
-                    setTargetWindowSpecsById(currentWindowId, { window: next})
+                    setTargetWindowSpecsById(currentWindowId, { windows: next})
                     return next;
                 });
             }
@@ -190,8 +190,10 @@ export default function useWindowManager(currentWindowId){
     }
     function setWindowState(title, value){
         setStates((prev)=>{
+            console.log(1+` ${currentWindowId}`,prev)
             prev[title] = value;
             setTargetWindowSpecsById(currentWindowId, { states: prev })
+            console.log(2+` ${currentWindowId}`,prev)
             return prev;
         });
     }
