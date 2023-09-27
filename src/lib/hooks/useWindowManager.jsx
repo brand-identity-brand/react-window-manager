@@ -5,9 +5,9 @@ import { WindowManagerRegistryContext } from "../context/WindowManagerRegistry";
 
 export default function useWindowManager(currentWindowId){
     const {
+        // doesTargetWindowIdExist,
         getTargetWindowSpecsById,
         setTargetWindowSpecsById,
-        initWindow,
         reassginTargetWindowId  
     } = useContext(WindowManagerRegistryContext);
 
@@ -18,20 +18,25 @@ export default function useWindowManager(currentWindowId){
     const [ states, setStates ] = useState(statesFromLastSession); 
     // utility functions
     function registerWindow(childWindowId){
+        const isSelfReferncing = childWindowId === currentWindowId;
+        const isChildAlreadyRegistered = active.includes(childWindowId) || hidden.includes(childWindowId);
         //checker0
-        if ( active.includes(childWindowId) ) return;
-        //checker0 passedsetTargetWindowSpecsById
-        setWindows((prev)=> {
-            const next = {
-                active: [...prev.active, childWindowId],
-                hidden: prev.hidden,
-                closed: prev.closed
-            };
-            setTargetWindowSpecsById(currentWindowId, {windows: next});
-            return next;
-        });
-        const { registeredIn: prevRegisteredIn } = getTargetWindowSpecsById(childWindowId);
-        setTargetWindowSpecsById(childWindowId, {registeredIn: [...prevRegisteredIn, currentWindowId]});
+        if ( isSelfReferncing || isChildAlreadyRegistered ){
+
+        }else{
+            //checker0 passedsetTargetWindowSpecsById
+            setWindows((prev)=> {
+                const next = {
+                    active: [...prev.active, childWindowId],
+                    hidden: prev.hidden,
+                    closed: prev.closed
+                };
+                setTargetWindowSpecsById(currentWindowId, {windows: next});
+                return next;
+            });
+            const { registeredIn: prevRegisteredIn } = getTargetWindowSpecsById(childWindowId);
+            setTargetWindowSpecsById(childWindowId, {registeredIn: [...prevRegisteredIn, currentWindowId]});
+        }
     }
     /* pass below functions from parent Context*/
     function liftWindowToTop(childWindowId){
@@ -186,20 +191,26 @@ export default function useWindowManager(currentWindowId){
     function setWindowState(title, value){
         setStates((prev)=>{
             prev[title] = value;
+            setTargetWindowSpecsById(currentWindowId, { states: prev })
             return prev;
         });
     }
     function getWindowState(title){
-
         return states[title]
     }
+
+    function useRdeState(title, value){
+        if ( states.hasOwnProperty(title) ) {
+            return [ states[title], (value)=>setWindowState(title, value) ]
+        }
+        setWindowState(title, value);
+        return [ states[title], (value)=>setWindowState(title, value) ]
+    };
 
     return {
         currentWindowId,
         windows,
         //
-        // getNextIdCounter: getNextIdCounter, //function
-        initWindow: initWindow,//function,
         registerWindow: registerWindow,
         //
         liftWindowToTop: liftWindowToTop,
@@ -208,7 +219,8 @@ export default function useWindowManager(currentWindowId){
         closeWindow: closeWindow,
         //
         isWindowStatesReady,
-        setWindowState,
-        getWindowState
+        // setWindowState,
+        // getWindowState,
+        useRdeState
     }
 }
