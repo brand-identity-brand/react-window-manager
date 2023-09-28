@@ -1,12 +1,17 @@
 import { useState, useRef } from "react";
-
+import { deepCopyObj } from "../utils";
 export default function useWindowManagerRegistry(windowSpecsFromLastSession, syncToDataBaseFunctions) {
 
-    const [ hasUnsavedStates, setHadUnsavedStates ] = useState(false); //tells the app if data are synced to database;
+    // const [ hasUnsavedStates, setHadUnsavedStates ] = useState(false); //tells the app if data are synced to database;
 
     const windowSpecsRef = useRef( windowSpecsFromLastSession ? windowSpecsFromLastSession : {} );
     function getAllWindowSpecs(){
-        return windowSpecsRef.current
+        // console.log('accessed windowSpecsRef.current')
+        return deepCopyObj(windowSpecsRef.current);
+    }
+    function setAllWindowSpecs(nextCurrent){
+        // console.log('set windowSpecsRef.current')
+        windowSpecsRef.current = nextCurrent
     }
 	// {
 	// 	"id": {
@@ -23,10 +28,11 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
 	// }
     
     function doesTargetWindowIdExist(targetWindowId){
-        return windowSpecsRef.current.hasOwnProperty(targetWindowId);
+        
+        return getAllWindowSpecs().hasOwnProperty(targetWindowId);
     }
     function getTargetWindowSpecsById(targetWindowId){
-        return windowSpecsRef.current[targetWindowId];
+        return getAllWindowSpecs()[targetWindowId];
     }
     /**
      * setTargetWindowSpecsById('WarehousgetTargetWindowSpecsByIde', { windows: { active: ['Edit'], hidden: [], closed: [] } })
@@ -35,28 +41,36 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
      * @returns 
      */
     function setTargetWindowSpecsById(targetWindowId, anObjectOfSpecsToUpdate){
-        const targetWindowSpecs = windowSpecsRef.current[targetWindowId];
+        const allWindowSpecsClone = getAllWindowSpecs();
+        const targetWindowSpecs = allWindowSpecsClone[targetWindowId];
         const nextTargetWindowSpecs = { ...targetWindowSpecs, ...anObjectOfSpecsToUpdate };
-        windowSpecsRef.current[targetWindowId] = nextTargetWindowSpecs;
-        // setHadUnsavedStates(true);
-        return windowSpecsRef.current;
+        setAllWindowSpecs({
+            ...allWindowSpecsClone,
+            [targetWindowId]: nextTargetWindowSpecs
+        })
     }
     /** */
-    const defaultWindowSpecs = { Component:'',props:{},states:{},windows:{active:[],hidden:[],closed:[]},registeredIn:[] }
+    const defaultWindowSpecs = { 
+        Component:'',
+        props:{},
+        states:{},
+        windows:{active:[],hidden:[],closed:[]},
+        registeredIn:[] 
+    }
     function initWindow(newWindowId, specs=defaultWindowSpecs){
         // if windowId exist, abort
-        if ( windowSpecsRef.current.hasOwnProperty(newWindowId) ) {
+        if ( getAllWindowSpecs().hasOwnProperty(newWindowId) ) {
             // TODO: bring the window of newWindowId to the top
         } else {
             const result = { ...defaultWindowSpecs, ...specs }
-            windowSpecsRef.current[newWindowId] = result;
+            const allWindowSpecsClone = getAllWindowSpecs();
+            setAllWindowSpecs({[newWindowId]:result, ...allWindowSpecsClone});
         }
-
         // setHadUnsavedStates(true);
     }
 // !
     // function registerWindow(childWindowId, parentWindowId, mode = 'active'){
-    //     const { [mode]: addToThisArray, ...rest } =  windowSpecsRef.current[parentWindowId].windows; //getTargetWindowSpecsById(parentWindowId).
+    //     const { [mode]: addToThisArray, ...rest } =  getAllWindowSpecs()[parentWindowId].windows; //getTargetWindowSpecsById(parentWindowId).
     //     setTargetWindowSpecsById(parentWindowId, { windows: {
     //         [mode]: [...addToThisArray, childWindowId], ...rest
     //     } });
@@ -64,12 +78,12 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
     // }
 
     function reassginTargetWindowId(targetWindowId, nextWindowId){
-        const { [targetWindowId]: targetWindowSpecs, ...otherWindowIds } = windowSpecsRef.current;
+        const { [targetWindowId]: targetWindowSpecs, ...otherWindowIds } = getAllWindowSpecs();
         // rename key
         const next = { [nextWindowId]: targetWindowSpecs, ...otherWindowIds };
         // rename Id in all affected parentWindow.windows 
         targetWindowSpecs.registeredIn.forEach( parentWindowId => {
-            const parentWindowSpecs = windowSpecsRef.current[parentWindowId];
+            const parentWindowSpecs = getAllWindowSpecs()[parentWindowId];
             const { active, hidden, closed }= parentWindowSpecs.windows;
             const nextActive = active.map( childWindowId => { return childWindowId===targetWindowId? nextWindowId : childWindowId });
             const nextHidden = hidden.map( childWindowId => { return childWindowId===targetWindowId? nextWindowId : childWindowId });
@@ -81,7 +95,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
             }})
         });
         // rename in specs
-        windowSpecsRef.current = next;
+        setAllWindowSpecs(next);
         // setHadUnsavedStates(true);
     }
 

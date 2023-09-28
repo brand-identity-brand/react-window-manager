@@ -5,7 +5,7 @@ export const WindowManagerRegistryContext = createContext(null);
 
 
 export default function WindowManagerRegistryProvider({children, windowSpecsFromLastSession, syncToDataBaseFunctions}){
-
+// console.log('WMRP')
     const value = useWindowManagerRegistry(windowSpecsFromLastSession, syncToDataBaseFunctions);
 
     return(

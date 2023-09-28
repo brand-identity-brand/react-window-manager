@@ -5,6 +5,7 @@ import { WindowManagerRegistryContext } from "../context/WindowManagerRegistry";
 
 export default function useWindowManager(currentWindowId){
     const {
+        getAllWindowSpecs,
         // doesTargetWindowIdExist,
         getTargetWindowSpecsById,
         setTargetWindowSpecsById,
@@ -15,7 +16,7 @@ export default function useWindowManager(currentWindowId){
     const { windows: windowsFromLastSession, states: statesFromLastSession } = getTargetWindowSpecsById(currentWindowId);
     const [ windows, setWindows ] = useState(windowsFromLastSession);
     const { active, hidden, closed } = windows;
-    const [ states, setStates ] = useState(statesFromLastSession); 
+    const [ states, setStates ] = useState(statesFromLastSession);  //? statesFromLastSession : {}
     // utility functions
     function registerWindow(childWindowId){
         const isSelfReferncing = childWindowId === currentWindowId;
@@ -190,10 +191,8 @@ export default function useWindowManager(currentWindowId){
     }
     function setWindowState(title, value){
         setStates((prev)=>{
-
             prev[title] = value;
             setTargetWindowSpecsById(currentWindowId, { states: prev })
-
             return prev;
         });
     }
