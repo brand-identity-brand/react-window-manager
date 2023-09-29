@@ -207,6 +207,11 @@ export default function useWindowManager(currentWindowId){
         }
         return Object.keys(states).length > 0;
     }
+    // initialise state[title] without calling useWindowState for code readability
+    function initWindowState(title, value){
+        states[title] = value;
+        return value;
+    }
     function setWindowState(title, value){
         setStates((prev)=>{
             prev[title] = value;
@@ -243,6 +248,7 @@ export default function useWindowManager(currentWindowId){
         closeWindow,
         // states
         isWindowStatesReady,
+        initWindowState,
         setWindowState,
         getWindowState,
         useWindowState
