@@ -229,6 +229,7 @@ export default function useWindowManager(currentWindowId){
     return {
         currentWindowId,
         windows,
+        states,
         //
         registerWindow,
         // controllers
