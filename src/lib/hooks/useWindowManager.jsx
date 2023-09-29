@@ -211,7 +211,7 @@ export default function useWindowManager(currentWindowId){
         setStates((prev)=>{
             prev[title] = value;
             setTargetWindowSpecsById(currentWindowId, { states: prev })
-            return prev;
+            return {...prev};
         });
     }
     function getWindowState(title){
@@ -222,7 +222,11 @@ export default function useWindowManager(currentWindowId){
         if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
             return [ states[title], (value)=>setWindowState(title, value) ]
         }
-        setWindowState(title, value);
+        // * below line of code initialises new state by adding it directly to the current states
+        // * this ensures returned states[title] is not undefined and will not trigger a rerender
+        // * rerender will occure when app runs setWindowState
+        // * this is a needed anti pattern (react) or the code could get messy with useEffects
+        states[title] = value;
         return [ states[title], (value)=>setWindowState(title, value) ]
     };
 
