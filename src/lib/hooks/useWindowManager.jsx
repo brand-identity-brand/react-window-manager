@@ -6,6 +6,7 @@ import { WindowManagerRegistryContext } from "../context/WindowManagerRegistry";
 export default function useWindowManager(currentWindowId){
     const {
         getAllWindowSpecs,
+        setAllWindowSpecs,
         // doesTargetWindowIdExist,
         getTargetWindowSpecsById,
         setTargetWindowSpecsById,
@@ -103,10 +104,19 @@ export default function useWindowManager(currentWindowId){
             return next;
         });
     }
-
+    // loop through registeredId
+    // update all windows spec if applicable
     function closeWindow(childWindowId, status){
+        // prepare closed windowId for archiving.
         const timestamp = Date.now();
         const nextChildWindowId = `${childWindowId}@${timestamp}`;
+        // get child window's children
+        // { active, hidden, closed } = childenWindowSpecs.windows
+        const childWindowSpecs = getTargetWindowSpecsById(childWindowId);
+        const childWindowRegisteredIn = childWindowSpecs.registeredIn
+        // update registeredIn spec of the childWindow
+        const nextChildWindowRegisteredIn = childWindowRegisteredIn.filter( parentWindowId => parentWindowId !== currentWindowId );
+        setTargetWindowSpecsById( childWindowId, { registeredIn: nextChildWindowRegisteredIn });
         switch (status) {
             case 'active': {
                 //checker0
@@ -178,7 +188,15 @@ export default function useWindowManager(currentWindowId){
                 });
             }
         }
-        reassginTargetWindowId(childWindowId, nextChildWindowId)
+
+        if ( childWindowRegisteredIn.length === 0 ) {
+            reassginTargetWindowId(childWindowId, nextChildWindowId)
+        } else {
+            const allWindowSpecs = getAllWindowSpecs();
+            const nextAllWindowSpecs = { ...allWindowSpecs, [nextChildWindowId]: childWindowSpecs }
+            setAllWindowSpecs( nextAllWindowSpecs )
+        }
+        
     }
     function isWindowStatesReady(stateTitlesArray=[]){
 
@@ -200,28 +218,28 @@ export default function useWindowManager(currentWindowId){
         return states[title]
     }
 
-    // function useWmState(title, value){
-    //     if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
-    //         return [ states[title], (value)=>setWindowState(title, value) ]
-    //     }
-    //     setWindowState(title, value);
-    //     return [ states[title], (value)=>setWindowState(title, value) ]
-    // };
+    function useWindowState(title, value){
+        if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
+            return [ states[title], (value)=>setWindowState(title, value) ]
+        }
+        setWindowState(title, value);
+        return [ states[title], (value)=>setWindowState(title, value) ]
+    };
 
     return {
         currentWindowId,
         windows,
         //
-        registerWindow: registerWindow,
-        //
-        liftWindowToTop: liftWindowToTop,
-        hideWindow: hideWindow,
-        unhideWindow: unhideWindow,
-        closeWindow: closeWindow,
-        //
+        registerWindow,
+        // controllers
+        liftWindowToTop,
+        hideWindow,
+        unhideWindow,
+        closeWindow,
+        // states
         isWindowStatesReady,
         setWindowState,
         getWindowState,
-        // useWmState
+        useWindowState
     }
 }
