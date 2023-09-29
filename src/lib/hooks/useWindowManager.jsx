@@ -208,8 +208,13 @@ export default function useWindowManager(currentWindowId){
         return Object.keys(states).length > 0;
     }
     // initialise state[title] without calling useWindowState for code readability
+    // if state[title] doesnt exist it will return value, if exist it will return state[title]
     function initWindowState(title, value){
+        if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
+            return states[title]
+        }
         states[title] = value;
+        setTargetWindowSpecsById(currentWindowId, { states: states })
         return value;
     }
     function setWindowState(title, value){
@@ -232,6 +237,7 @@ export default function useWindowManager(currentWindowId){
         // * rerender will occure when app runs setWindowState
         // * this is a needed anti pattern (react) or the code could get messy with useEffects
         states[title] = value;
+        setTargetWindowSpecsById(currentWindowId, { states: states })
         return [ states[title], (value)=>setWindowState(title, value) ]
     };
 
