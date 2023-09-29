@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/lib/index.jsx'),
-      name: 'React Window Manager',
+      name: 'react-Window-manager',
       fileName: (format) => `react-window-manager.${format}.js`
     },
     rollupOptions: {
