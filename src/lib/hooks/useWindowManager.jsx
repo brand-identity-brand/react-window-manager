@@ -14,7 +14,7 @@ export default function useWindowManager(currentWindowId){
     } = useContext(WindowManagerRegistryContext);
 
     // below const are used once when hydrating from last session.
-    const { windows: windowsFromLastSession, states: statesFromLastSession } = getTargetWindowSpecsById(currentWindowId);
+    const { windows: windowsFromLastSession, states: statesFromLastSession } = getTargetWindowSpecsById(currentWindowId, true);
     const [ windows, setWindows ] = useState(windowsFromLastSession);
     const { active, hidden, closed } = windows;
     const [ states, setStates ] = useState(statesFromLastSession);  //? statesFromLastSession : {}
@@ -305,10 +305,12 @@ export default function useWindowManager(currentWindowId){
         setTargetWindowSpecsById(currentWindowId, { states: states })
         return value;
     }
-    function setWindowState(title, value){
+    function setWindowState(title, value, autoSyncToWindowSpecsRef = false){
         setStates((prev)=>{
             prev[title] = value;
-            setTargetWindowSpecsById(currentWindowId, { states: prev })
+            if ( autoSyncToWindowSpecsRef ) {
+                setTargetWindowSpecsById(currentWindowId, { states: prev })
+            }
             return {...prev};
         });
     }

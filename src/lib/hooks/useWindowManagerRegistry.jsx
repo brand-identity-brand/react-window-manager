@@ -9,9 +9,16 @@ import { deepCopyObj } from "../utils";
  */
 export default function useWindowManagerRegistry(windowSpecsFromLastSession){//, syncWindowSpecsToDataBaseFunction=()=>{}) {
     const windowSpecsRef = useRef( windowSpecsFromLastSession ? windowSpecsFromLastSession : {} );
-    function getAllWindowSpecs(){
+    /**
+     * 
+     * @param {boolean} deepCopy 
+     * @returns 
+     */
+    function getAllWindowSpecs(deepCopy=false){
         // console.log('accessed windowSpecsRef.current')
-        return deepCopyObj(windowSpecsRef.current);
+        if ( deepCopy ) return deepCopyObj(windowSpecsRef.current);
+        return windowSpecsRef.current;
+        
     }
     function setAllWindowSpecs(nextCurrent){
         // console.log('set windowSpecsRef.current')
@@ -35,8 +42,8 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
         
         return getAllWindowSpecs().hasOwnProperty(targetWindowId);
     }
-    function getTargetWindowSpecsById(targetWindowId){
-        return getAllWindowSpecs()[targetWindowId];
+    function getTargetWindowSpecsById(targetWindowId, deepCopy=false){
+        return getAllWindowSpecs(deepCopy)[targetWindowId];
     }
     /**
      * setTargetWindowSpecsById('WarehousgetTargetWindowSpecsByIde', { windows: { active: ['Edit'], hidden: [], closed: [] } })
@@ -47,7 +54,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
     function setTargetWindowSpecsById(targetWindowId, anObjectOfSpecsToUpdate){
         const allWindowSpecsClone = getAllWindowSpecs();
         const targetWindowSpecs = allWindowSpecsClone[targetWindowId];
-        const nextTargetWindowSpecs = { ...targetWindowSpecs, ...anObjectOfSpecsToUpdate };
+        const nextTargetWindowSpecs = { ...targetWindowSpecs, ...deepCopyObj(anObjectOfSpecsToUpdate) };
         setAllWindowSpecs({
             ...allWindowSpecsClone,
             [targetWindowId]: nextTargetWindowSpecs
