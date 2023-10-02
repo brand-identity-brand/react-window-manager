@@ -189,7 +189,7 @@ export default function useWindowManager(currentWindowId){
             }
         }
 
-        if ( childWindowRegisteredIn.length === 0 ) {
+        if ( getTargetWindowSpecsById(childWindowId).registeredIn.length === 0 ) {
             reassginTargetWindowId(childWindowId, nextChildWindowId)
         } else {
             const allWindowSpecs = getAllWindowSpecs();
