@@ -305,19 +305,19 @@ export default function useWindowManager(currentWindowId){
         setTargetWindowSpecsById(currentWindowId, { states: states })
         return value;
     }
-    function setWindowState(title, value, autoSyncToWindowSpecsRef = false){
+    function setWindowState(title, value){
         setStates((prev)=>{
             prev[title] = value;
-            if ( autoSyncToWindowSpecsRef ) {
-                setTargetWindowSpecsById(currentWindowId, { states: prev })
-            }
+            // setTargetWindowSpecsById(currentWindowId, { states: prev })
             return {...prev};
         });
     }
     function getWindowState(title){
         return states[title]
     }
-
+    function syncWindowState(){
+        setTargetWindowSpecsById(currentWindowId, { states: states })
+    }
     function useWindowState(title, value){
         if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
             return [ states[title], (value)=>setWindowState(title, value) ]
@@ -348,6 +348,7 @@ export default function useWindowManager(currentWindowId){
         initWindowState,
         setWindowState,
         getWindowState,
-        useWindowState
+        syncWindowState,
+        useWindowState,
     }
 }
