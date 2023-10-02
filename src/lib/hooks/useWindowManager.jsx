@@ -327,7 +327,7 @@ export default function useWindowManager(currentWindowId){
         // * rerender will occure when app runs setWindowState
         // * this is a needed anti pattern (react) or the code could get messy with useEffects
         states[title] = value;
-        setTargetWindowSpecsById(currentWindowId, { states: states })
+        // setTargetWindowSpecsById(currentWindowId, { states: states })
         return [ states[title], (value)=>setWindowState(title, value) ]
     };
 
