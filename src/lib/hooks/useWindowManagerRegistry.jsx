@@ -1,9 +1,13 @@
 import { useState, useRef } from "react";
 import { deepCopyObj } from "../utils";
-export default function useWindowManagerRegistry(windowSpecsFromLastSession, syncToDataBaseFunctions) {
 
-    // const [ hasUnsavedStates, setHadUnsavedStates ] = useState(false); //tells the app if data are synced to database;
-
+/**
+ * 
+ * @param {Object} windowSpecsFromLastSession
+//  * @param {Object} syncWindowSpecsToDataBaseFunction - functions 
+ * @returns 
+ */
+export default function useWindowManagerRegistry(windowSpecsFromLastSession){//, syncWindowSpecsToDataBaseFunction=()=>{}) {
     const windowSpecsRef = useRef( windowSpecsFromLastSession ? windowSpecsFromLastSession : {} );
     function getAllWindowSpecs(){
         // console.log('accessed windowSpecsRef.current')
@@ -26,7 +30,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
 	// 		states: {}
 	// 	}
 	// }
-    
+
     function doesTargetWindowIdExist(targetWindowId){
         
         return getAllWindowSpecs().hasOwnProperty(targetWindowId);
@@ -99,6 +103,14 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
         // setHadUnsavedStates(true);
     }
 
+    const hasUnsaveSpecsRef = useRef(false);
+    function getHasUnsaveSpecs(){ 
+        return hasUnsaveSpecsRef.current 
+    };
+    function setHasUnsaveSpecs( boolean ){ 
+        hasUnsaveSpecsRef.current = boolean 
+    };
+
     return {
         getAllWindowSpecs,
         doesTargetWindowIdExist,
@@ -106,6 +118,9 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession, syn
         setTargetWindowSpecsById,
         initWindow,
         // registerWindow,
-        reassginTargetWindowId
+        reassginTargetWindowId,
+        //
+        getHasUnsaveSpecs,
+        setHasUnsaveSpecs
     }
 }

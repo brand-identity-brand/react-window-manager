@@ -106,6 +106,7 @@ export default function useWindowManager(currentWindowId){
     }
     // loop through registeredId
     // update all windows spec if applicable
+    // TODO: this will support window historys. specifics are to be determined
     function closeWindow(childWindowId, status){
         // prepare closed windowId for archiving.
         const timestamp = Date.now();
@@ -198,6 +199,93 @@ export default function useWindowManager(currentWindowId){
         }
         
     }
+    function temp_closeWindow(childWindowId, status){
+        // * in the complete version this would attach unix timestamp at close
+        const nextChildWindowId = childWindowId;
+
+        switch (status) {
+            case 'active': {
+                //checker0
+                const fromActive = active.includes(childWindowId);
+                if ( fromActive === false ) break;
+                //checker0 passed
+                const nextActive = active.filter( (value) => {
+                    if ( value === childWindowId ) return false;
+                    return true;
+                });
+                setWindows((prev)=> {
+                    const next = {
+                        active: nextActive,
+                        hidden: prev.hidden,
+                        closed: [...prev.closed, nextChildWindowId]
+                    };
+                    setTargetWindowSpecsById(currentWindowId, { windows: next})
+                    return next;
+                });
+                break;
+            }
+            case 'hidden': {
+                //checker0
+                const fromHidden = hidden.includes(childWindowId);
+                if (fromHidden === false ) break;
+                //checker0 passed
+                const nextHidden = hidden.filter( (value) => {
+                    if ( value === childWindowId ) return false;
+                    return true;
+                });
+                setWindows((prev)=> {
+                    const next = {
+                        active: prev.active,
+                        hidden: nextHidden,
+                        closed: [...prev.closed, nextChildWindowId]
+                    }
+                    setTargetWindowSpecsById(currentWindowId, { windows: next})
+                    return next;
+                });
+                break;
+            }
+            default: {
+                //checker0
+                const fromActive = active.includes(childWindowId);
+                const fromHidden = hidden.includes(childWindowId);
+                if ( fromActive === false && fromHidden === false ) break;
+                //checker0 passed
+                const nextActiveHidden = { active, hidden };
+                if ( fromActive === true ) {
+                    nextActiveHidden.active = active.filter( (value) => {
+                        if ( value === childWindowId ) return false;
+                        return true;
+                    });
+                }
+                if ( fromHidden === true ) {
+                    nextActiveHidden.hidden = hidden.filter( (value) => {
+                        if ( value === childWindowId ) return false;
+                        return true;
+                    });
+                }
+                setWindows((prev)=> {
+                    const next = {
+                        active: nextActiveHidden.active,
+                        hidden: nextActiveHidden.hidden,
+                        closed: [...prev.closed, nextChildWindowId]
+                    }
+                    setTargetWindowSpecsById(currentWindowId, { windows: next})
+                    return next;
+                });
+            }
+        }
+        // * udpate registeredIn
+        // TODO: support multiple registration
+        // ! this does not support multiple registration
+        // ! possible solution:
+        //  ! register all setWindows and setStates to WindowManagerRegistrationContext
+        //  ! loop or use recursion to apply changes to all parent windows
+        //  ! e.g. closeWindow(childWindowId, parentWindowId, status)
+        const childWindowSpecs = getTargetWindowSpecsById(childWindowId);
+        const childWindowRegisteredIn = childWindowSpecs.registeredIn;
+        const nextChildWindowRegisteredIn = childWindowRegisteredIn.filter( parentWindowId => parentWindowId !== currentWindowId )
+        setTargetWindowSpecsById(childWindowId, {registeredIn: nextChildWindowRegisteredIn})
+    }
     function isWindowStatesReady(stateTitlesArray=[]){
 
         if ( stateTitlesArray.length ) {
@@ -251,7 +339,8 @@ export default function useWindowManager(currentWindowId){
         liftWindowToTop,
         hideWindow,
         unhideWindow,
-        closeWindow,
+        // TODO
+        closeWindow: temp_closeWindow,
         // states
         isWindowStatesReady,
         initWindowState,
