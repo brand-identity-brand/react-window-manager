@@ -2,6 +2,7 @@ import { createContext, useRef, useEffect, useState, useContext } from "react";
 import useWindowManager from "../hooks/useWindowManager";
 
 export const WindowManagerContext = createContext(null);
+WindowManagerContext.displayName = 'WindowManagerContext';
 
 export default function WindowManagerProvider({id, children}){
     // console.log('WMP '+id)
