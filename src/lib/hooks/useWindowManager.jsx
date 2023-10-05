@@ -300,7 +300,7 @@ export default function useWindowManager(currentWindowId){
     // this hacks around react setState rerender
     // ! be aware of this anti pattern
     function setWindowStateWithoutRerendering(title, value){
-        statesRef.current = { ...statesRef.current, [title]: value }
+        statesRef.current[title] = value;
         // states[title] = value;
     }
     // initialise state[title] without calling useWindowState for code readability
