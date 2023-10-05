@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState } from 'react';
 
 import { WindowManagerContext, WindowManagerProvider, WindowManagerRegistryContext } from './lib';
 

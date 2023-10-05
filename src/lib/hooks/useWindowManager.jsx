@@ -14,10 +14,12 @@ export default function useWindowManager(currentWindowId){
     } = useContext(WindowManagerRegistryContext);
 
     // below const are used once when hydrating from last session.
-    const { windows: windowsFromLastSession, states: statesFromLastSession } = getTargetWindowSpecsById(currentWindowId, true);
-    const [ windows, setWindows ] = useState(windowsFromLastSession);
+    // const { current: { windows: windowsFromLastSession, states: statesFromLastSession }} = useRef( getTargetWindowSpecsById(currentWindowId, true) );
+    const [ windows, setWindows ] = useState(getTargetWindowSpecsById(currentWindowId, true).windows);
     const { active, hidden, closed } = windows;
-    const [ states, setStates ] = useState(statesFromLastSession);  //? statesFromLastSession : {}
+
+    const statesRef = useRef(getTargetWindowSpecsById(currentWindowId, true).states);
+    const [ states, setStates ] = useState(statesRef.current);  //? statesFromLastSession : {}
     // utility functions
     function registerWindow(childWindowId){
         const isSelfReferncing = childWindowId === currentWindowId;
@@ -286,14 +288,20 @@ export default function useWindowManager(currentWindowId){
         const nextChildWindowRegisteredIn = childWindowRegisteredIn.filter( parentWindowId => parentWindowId !== currentWindowId )
         setTargetWindowSpecsById(childWindowId, {registeredIn: nextChildWindowRegisteredIn})
     }
-    function isWindowStatesReady(stateTitlesArray=[]){
+    // function isWindowStatesReady(stateTitlesArray=[]){
 
-        if ( stateTitlesArray.length ) {
-            const anArrayOfBoolean = stateTitlesArray.map( title=> states.hasOwnProperty(title))
-            const result = !anArrayOfBoolean.includes(false);
-            return result;
-        }
-        return Object.keys(states).length > 0;
+    //     if ( stateTitlesArray.length ) {
+    //         const anArrayOfBoolean = stateTitlesArray.map( title=> states.hasOwnProperty(title))
+    //         const result = !anArrayOfBoolean.includes(false);
+    //         return result;
+    //     }
+    //     return Object.keys(states).length > 0;
+    // }
+    // this hacks around react setState rerender
+    // ! be aware of this anti pattern
+    function setWindowStateWithoutRerendering(title, value){
+        statesRef.current = { ...statesRef.current, [title]: value }
+        // states[title] = value;
     }
     // initialise state[title] without calling useWindowState for code readability
     // if state[title] doesnt exist it will return value, if exist it will return state[title]
@@ -301,34 +309,43 @@ export default function useWindowManager(currentWindowId){
         if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
             return states[title]
         }
+        setWindowStateWithoutRerendering(title, value);
         states[title] = value;
-        setTargetWindowSpecsById(currentWindowId, { states: states })
-        return value;
+        syncWindowState();
+        return states[title];
     }
-    function setWindowState(title, value){
-        setStates((prev)=>{
-            prev[title] = value;
-            // setTargetWindowSpecsById(currentWindowId, { states: prev })
-            return {...prev};
-        });
+
+    function setWindowState(value, refresh=true, title){
+        setWindowStateWithoutRerendering(title, value);
+        if ( refresh ) {
+            // ! potential object refrence issue
+            setStates({...statesRef.current})
+            // setStates((prev)=>{
+            //     prev[title] = value;
+            //     // setTargetWindowSpecsById(currentWindowId, { states: prev })
+            //     return {...prev};
+            // });
+        }
+        syncWindowState();
     }
+
     function getWindowState(title){
         return states[title]
     }
     function syncWindowState(){
-        setTargetWindowSpecsById(currentWindowId, { states: states })
+        setTargetWindowSpecsById(currentWindowId, { states: {...statesRef.current }})
     }
     function useWindowState(title, value){
         if ( states.hasOwnProperty(title) ) { //getTargetWindowSpecsById(currentWindowId).states.hasOwnProperty('title') 
-            return [ states[title], (value)=>setWindowState(title, value) ]
+            return [ states[title], (value, refresh=true)=>setWindowState(value, refresh, title) ]
         }
         // * below line of code initialises new state by adding it directly to the current states
         // * this ensures returned states[title] is not undefined and will not trigger a rerender
         // * rerender will occure when app runs setWindowState
         // * this is a needed anti pattern (react) or the code could get messy with useEffects
         states[title] = value;
-        // setTargetWindowSpecsById(currentWindowId, { states: states })
-        return [ states[title], (value)=>setWindowState(title, value) ]
+        syncWindowState();
+        return [ states[title], (value, refresh=true)=>setWindowState(value, refresh, title) ]
     };
 
     return {
@@ -344,8 +361,9 @@ export default function useWindowManager(currentWindowId){
         // TODO
         closeWindow: temp_closeWindow,
         // states
-        isWindowStatesReady,
+        // isWindowStatesReady,
         initWindowState,
+        setWindowStateWithoutRerendering,
         setWindowState,
         getWindowState,
         syncWindowState,
