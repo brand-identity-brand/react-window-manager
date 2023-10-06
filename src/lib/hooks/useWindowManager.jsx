@@ -10,7 +10,8 @@ export default function useWindowManager(currentWindowId){
         // doesTargetWindowIdExist,
         getTargetWindowSpecsById,
         setTargetWindowSpecsById,
-        reassginTargetWindowId  
+        reassginTargetWindowId, 
+        initWindow
     } = useContext(WindowManagerRegistryContext);
 
     // below const are used once when hydrating from last session.
@@ -41,6 +42,25 @@ export default function useWindowManager(currentWindowId){
             const { registeredIn: prevRegisteredIn } = getTargetWindowSpecsById(childWindowId);
             setTargetWindowSpecsById(childWindowId, {registeredIn: [...prevRegisteredIn, currentWindowId]});
         }
+    }
+    function initRegisterWindow(windowId, windowSpecs){
+        const { Component, ...rest } = windowSpecs;
+        initWindow(windowId, {
+            Component: Component.displayName,
+            ...rest
+            // props: {
+            //     initialTitle : windowId,
+            //     initialPosition: {
+            //         left: 10,
+            //         top: 10
+            //     },
+            //     initialSize: {
+            //         width: 700,
+            //         height: 330
+            //     }
+            // }
+        });
+        registerWindow(windowId); 
     }
     /* pass below functions from parent Context*/
     function liftWindowToTop(childWindowId){
@@ -354,6 +374,7 @@ export default function useWindowManager(currentWindowId){
         states,
         //
         registerWindow,
+        initRegisterWindow,
         // controllers
         liftWindowToTop,
         hideWindow,
