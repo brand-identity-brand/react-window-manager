@@ -88,7 +88,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
     //     // setHadUnsavedStates(true);
     // }
 
-    function reassginTargetWindowId(targetWindowId, nextWindowId){
+    function reassignTargetWindowId(targetWindowId, nextWindowId){
         const { [targetWindowId]: targetWindowSpecs, ...otherWindowIds } = getAllWindowSpecs();
         // rename key
         const next = { [nextWindowId]: targetWindowSpecs, ...otherWindowIds };
@@ -103,7 +103,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
                 active: nextActive,
                 hidden: nextHidden,
                 closed: nextClosed
-            }})
+            }});
         });
         // rename in specs
         setAllWindowSpecs(next);
@@ -125,7 +125,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
         setTargetWindowSpecsById,
         initWindow,
         // registerWindow,
-        reassginTargetWindowId,
+        reassignTargetWindowId,
         //
         getHasUnsaveSpecs,
         setHasUnsaveSpecs
