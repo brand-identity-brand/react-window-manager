@@ -4,9 +4,9 @@ import useWindowManagerRegistry from "../hooks/useWindowManagerRegistry";
 export const WindowManagerRegistryContext = createContext(null);
 WindowManagerRegistryContext.displayName = 'WindowManagerRegistryContext';
 
-export default function WindowManagerRegistryProvider({children, windowSpecsFromLastSession, syncToDataBaseFunctions}){
+export default function WindowManagerRegistryProvider({children, windowSpecsFromLastSession}){
 // console.log('WMRP')
-    const value = useWindowManagerRegistry(windowSpecsFromLastSession, syncToDataBaseFunctions);
+    const value = useWindowManagerRegistry(windowSpecsFromLastSession);
 
     return(
         <WindowManagerRegistryContext.Provider value={value}>
