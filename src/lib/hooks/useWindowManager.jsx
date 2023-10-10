@@ -79,10 +79,13 @@ export default function useWindowManager(currentWindowId){
                 hidden: prev.hidden,
                 closed: prev.closed
             };
-            setTargetWindowSpecsById(currentWindowId, { windows: next });
+            // setTargetWindowSpecsById(currentWindowId, { windows: next });
             return next;
         });
     }
+    useEffect(()=>{
+        setTargetWindowSpecsById(currentWindowId, { windows: windows});
+    },[windows])
     /**
      * checker0: if id is duplicated abort appending to hiddenWindowsRef.
      * @param {*} childWindowId 
