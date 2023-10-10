@@ -83,9 +83,7 @@ export default function useWindowManager(currentWindowId){
             return next;
         });
     }
-    useEffect(()=>{
-        setTargetWindowSpecsById(currentWindowId, { windows: windows});
-    },[windows])
+
     /**
      * checker0: if id is duplicated abort appending to hiddenWindowsRef.
      * @param {*} childWindowId 
@@ -106,7 +104,7 @@ export default function useWindowManager(currentWindowId){
                 hidden: [...prev.hidden, childWindowId],
                 closed: prev.closed
             }
-            setTargetWindowSpecsById(currentWindowId, {windows: next});
+            // setTargetWindowSpecsById(currentWindowId, {windows: next});
             return next;
         });
     }
@@ -125,7 +123,7 @@ export default function useWindowManager(currentWindowId){
                 hidden: nextHidden,
                 closed: prev.closed
             }
-            setTargetWindowSpecsById(currentWindowId, { windows: next } );
+            // setTargetWindowSpecsById(currentWindowId, { windows: next } );
             return next;
         });
     }
@@ -244,7 +242,7 @@ export default function useWindowManager(currentWindowId){
                         hidden: prev.hidden,
                         closed: [...prev.closed, nextChildWindowId]
                     };
-                    setTargetWindowSpecsById(currentWindowId, { windows: next})
+                    // setTargetWindowSpecsById(currentWindowId, { windows: next});
                     return next;
                 });
                 break;
@@ -264,7 +262,7 @@ export default function useWindowManager(currentWindowId){
                         hidden: nextHidden,
                         closed: [...prev.closed, nextChildWindowId]
                     }
-                    setTargetWindowSpecsById(currentWindowId, { windows: next})
+                    // setTargetWindowSpecsById(currentWindowId, { windows: next})
                     return next;
                 });
                 break;
@@ -294,7 +292,7 @@ export default function useWindowManager(currentWindowId){
                         hidden: nextActiveHidden.hidden,
                         closed: [...prev.closed, nextChildWindowId]
                     }
-                    setTargetWindowSpecsById(currentWindowId, { windows: next})
+                    // setTargetWindowSpecsById(currentWindowId, { windows: next})
                     return next;
                 });
             }
@@ -370,7 +368,12 @@ export default function useWindowManager(currentWindowId){
         syncWindowState();
         return [ states[title], (value, refresh=true)=>setWindowState(value, refresh, title) ]
     };
-
+    useEffect(()=>{
+        setTargetWindowSpecsById(currentWindowId, { windows: windows});
+    },[windows])
+    // useEffect(()=>{
+    //     setTargetWindowSpecsById(currentWindowId, { states: states});
+    // },[states])
     return {
         currentWindowId,
         windows,
