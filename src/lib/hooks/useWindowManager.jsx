@@ -295,10 +295,6 @@ export default function useWindowManager(currentWindowId){
                     return next;
                 });
             }
-            // removes the window from allSpecs
-            const allWindowSpecs = getAllWindowSpecs();
-            const { [nextChildWindowId]: childWindowSpecs, ...nextAllWindowSpecs } = allWindowSpecs;
-            setAllWindowSpecs( ...nextAllWindowSpecs )
         }
         // * udpate registeredIn
         // TODO: support multiple registration
@@ -307,10 +303,10 @@ export default function useWindowManager(currentWindowId){
         //  ! register all setWindows and setStates to WindowManagerRegistrationContext
         //  ! loop or use recursion to apply changes to all parent windows
         //  ! e.g. closeWindow(childWindowId, parentWindowId, status)
-        const childWindowSpecs = getTargetWindowSpecsById(childWindowId);
-        const childWindowRegisteredIn = childWindowSpecs.registeredIn;
-        const nextChildWindowRegisteredIn = childWindowRegisteredIn.filter( parentWindowId => parentWindowId !== currentWindowId )
-        setTargetWindowSpecsById(childWindowId, {registeredIn: nextChildWindowRegisteredIn})
+        // removes the window from allSpecs
+        const allWindowSpecs = getAllWindowSpecs();
+        const { [nextChildWindowId]: childWindowSpecs, ...nextAllWindowSpecs } = allWindowSpecs;
+        setAllWindowSpecs( ...nextAllWindowSpecs )
     }
     // function isWindowStatesReady(stateTitlesArray=[]){
 
