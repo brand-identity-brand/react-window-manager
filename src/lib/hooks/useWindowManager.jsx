@@ -295,6 +295,10 @@ export default function useWindowManager(currentWindowId){
                     return next;
                 });
             }
+            // removes the window from allSpecs
+            const allWindowSpecs = getAllWindowSpecs();
+            const { [nextChildWindowId]: childWindowSpecs, ...nextAllWindowSpecs } = allWindowSpecs;
+            setAllWindowSpecs( ...nextAllWindowSpecs )
         }
         // * udpate registeredIn
         // TODO: support multiple registration
