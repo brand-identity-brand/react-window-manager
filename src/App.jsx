@@ -1,13 +1,15 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { WindowManagerContext, WindowManagerProvider, WindowManagerRegistryContext } from './lib';
 
 function App() {
-    const { initWindow } = useContext(WindowManagerRegistryContext)
+    const { initWindow, getAllWindowSpecs } = useContext(WindowManagerRegistryContext)
     const { windows, registerWindow, hideWindow, unhideWindow, closeWindow} = useContext(WindowManagerContext);
 
     const [ idToAction, setIdToAction] = useState(0);
-    
+    useEffect(()=>{
+        console.log(getAllWindowSpecs())
+    })
     return (
         <div style={{ width: '100vw', height: '100vh'}}>
             {/* { filteredWindowIds.map( renderWindow ) } */}

@@ -306,7 +306,7 @@ export default function useWindowManager(currentWindowId){
         // removes the window from allSpecs
         const allWindowSpecs = getAllWindowSpecs();
         const { [nextChildWindowId]: childWindowSpecs, ...nextAllWindowSpecs } = allWindowSpecs;
-        setAllWindowSpecs( ...nextAllWindowSpecs )
+        setAllWindowSpecs( {...nextAllWindowSpecs} )
     }
     // function isWindowStatesReady(stateTitlesArray=[]){
 

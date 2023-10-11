@@ -120,6 +120,7 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
 
     return {
         getAllWindowSpecs,
+        setAllWindowSpecs,
         doesTargetWindowIdExist,
         getTargetWindowSpecsById,
         setTargetWindowSpecsById,
