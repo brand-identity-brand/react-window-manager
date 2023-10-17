@@ -307,6 +307,9 @@ export default function useWindowManager(currentWindowId){
         const allWindowSpecs = getAllWindowSpecs();
         const { [nextChildWindowId]: childWindowSpecs, ...nextAllWindowSpecs } = allWindowSpecs;
         setAllWindowSpecs( {...nextAllWindowSpecs} )
+
+        // TODO: priority
+        // cascade closeWindow for children
     }
     // function isWindowStatesReady(stateTitlesArray=[]){
 

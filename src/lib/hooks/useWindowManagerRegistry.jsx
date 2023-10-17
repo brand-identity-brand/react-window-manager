@@ -87,7 +87,30 @@ export default function useWindowManagerRegistry(windowSpecsFromLastSession){//,
     //     } });
     //     // setHadUnsavedStates(true);
     // }
-
+    function modifyAllTargetWindowInstances( targetWindowId, modifier=(parentWindowSpecs, parentWindowId )=>{}){
+        // const { [targetWindowId]: targetWindowSpecs, ...otherWindowIds } = getAllWindowSpecs();
+        const allWindowSpecs = getAllWindowSpecs();
+        // const targetWindowInstances = targetWindowSpecs.registeredIn; // [ id, id, id ]
+        const targetWindowInstancesParentWindowId = allWindowSpecs[targetWindowId].registeredIn;
+        const nextWindowSpecs = targetWindowInstancesParentWindowId.reduce( ( allWindowSpecs, parentWindowId )=>{
+            const parentWindowSpecs = allWindowSpecs[parentWindowId];
+            return modifier( parentWindowSpecs, parentWindowId );
+        }, allWindowSpecs);
+        setAllWindowSpecs( nextWindowSpecs );
+    }
+    // function reassignTargetWindowId(targetWindowId, newWindowId){
+    //     modifyAllTargetWindowInstances( targetWindowId, (parentWindowSpecs, parentWindowId )=>{
+    //         const { active, hidden, closed }= parentWindowSpecs.windows;
+    //         const nextActive = active.map( childWindowId => { return childWindowId===targetWindowId? newWindowId : childWindowId });
+    //         const nextHidden = hidden.map( childWindowId => { return childWindowId===targetWindowId? newWindowId : childWindowId });
+    //         const nextClosed = closed.map( childWindowId => { return childWindowId===targetWindowId? newWindowId : childWindowId });
+    //         parentWindowSpecs.windows = {
+    //             active: nextActive,
+    //             hidden: nextHidden,
+    //             closed: nextClosed
+    //         };
+    //     })
+    // }
     function reassignTargetWindowId(targetWindowId, nextWindowId){
         const { [targetWindowId]: targetWindowSpecs, ...otherWindowIds } = getAllWindowSpecs();
         // rename key
